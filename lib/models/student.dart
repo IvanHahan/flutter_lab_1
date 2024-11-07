@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
+
+const uuid = Uuid();
 
 enum Gender { male, female }
 enum Department { finance, law, it, medical }
@@ -22,8 +25,18 @@ class Student {
     required this.department,
     required this.gender,
     required this.grade
+  }) : id = uuid.v4();
+
+  Student.withId({
+    required this.id,
+    required this.firstName,
+    required this.lastName,
+    required this.department,
+    required this.gender,
+    required this.grade
   });
 
+  final String id;
   final String firstName;
   final String lastName;
   final Department department;

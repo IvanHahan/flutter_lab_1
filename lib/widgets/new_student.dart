@@ -2,9 +2,15 @@ import 'package:flutter_lab_1/models/student.dart';
 import 'package:flutter/material.dart';
 
 class NewStudent extends StatefulWidget {
-  const NewStudent({super.key, required this.onAddExpense});
+  NewStudent(
+      {super.key,
+      required this.onAddExpense,
+      required this.onEditStudent,
+      this.student});
 
   final void Function(Student expense) onAddExpense;
+  final void Function(Student student) onEditStudent;
+  Student? student;
 
   @override
   State<StatefulWidget> createState() {
@@ -19,6 +25,18 @@ class _NewStudentState extends State<NewStudent> {
 
   Gender _selectedGender = Gender.male;
   Department _selectedDepartment = Department.finance;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.student != null) {
+      _firstNameController.text = widget.student!.firstName;
+      _lastNameController.text = widget.student!.lastName;
+      _gradeController.text = widget.student!.grade.toString();
+      _selectedGender = widget.student!.gender;
+      _selectedDepartment = widget.student!.department;
+    }
+  }
 
   @override
   void dispose() {
@@ -54,21 +72,33 @@ class _NewStudentState extends State<NewStudent> {
       return;
     }
 
-    widget.onAddExpense(
-      Student(
+    if (widget.student != null) {
+      widget.onEditStudent(
+        Student.withId(
+          id: widget.student!.id,
           firstName: _firstNameController.text.trim(),
           lastName: _lastNameController.text.trim(),
           department: _selectedDepartment,
           gender: _selectedGender,
-          grade: entereGrade),
-    );
+          grade: entereGrade,
+        ),
+      );
+    } else {
+      widget.onAddExpense(
+        Student(
+            firstName: _firstNameController.text.trim(),
+            lastName: _lastNameController.text.trim(),
+            department: _selectedDepartment,
+            gender: _selectedGender,
+            grade: entereGrade),
+      );
+    }
     Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (ctx, constraints) {
-
       final firstNameField = TextField(
         controller: _firstNameController,
         maxLength: 50,
@@ -138,21 +168,20 @@ class _NewStudentState extends State<NewStudent> {
                     _selectedDepartment = value;
                   });
                 }),
-                
-                Row(
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Cancel'),
-                    ),
-                    const Spacer(),
-                    ElevatedButton(
-                        onPressed: _sumbitStudent,
-                        child: const Text('Save Student')),
-                  ],
+            Row(
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Cancel'),
                 ),
+                const Spacer(),
+                ElevatedButton(
+                    onPressed: _sumbitStudent,
+                    child: const Text('Save Student')),
+              ],
+            ),
           ],
         ),
       );

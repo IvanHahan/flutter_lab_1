@@ -50,12 +50,23 @@ class _ExpensesState extends State<Students> {
     });
   }
 
-  void _openAddExpenseOverlay() {
+  void _editStudent(Student student) {
+    final studentIndex = _students.indexWhere((s) => s.id == student.id);
+    setState(() {
+      _students[studentIndex] = student;
+    });
+  }
+
+  void _openAddStudentOverlay(Student? student) {
     showModalBottomSheet(
         useSafeArea: true,
         isScrollControlled: true,
         context: context,
-        builder: (ctx) => NewStudent(onAddExpense: _addStudent));
+        builder: (ctx) => NewStudent(
+              onAddExpense: _addStudent,
+              onEditStudent: _editStudent,
+              student: student,
+            ));
   }
 
   void _removeStudent(Student student) {
@@ -87,7 +98,10 @@ class _ExpensesState extends State<Students> {
           title: const Text('Students'),
           actions: [
             IconButton(
-                onPressed: _openAddExpenseOverlay, icon: const Icon(Icons.add))
+                onPressed: () {
+                  _openAddStudentOverlay(null);
+                },
+                icon: const Icon(Icons.add))
           ],
         ),
         body: Column(children: [
@@ -103,7 +117,12 @@ class _ExpensesState extends State<Students> {
                 onDismissed: (direction) {
                   _removeStudent(_students[index]);
                 },
-                child: StudentItem(student: _students[index]),
+                child: InkWell(
+                  onTap: () {
+                    _openAddStudentOverlay(_students[index]);
+                  },
+                  child: StudentItem(student: _students[index]),
+                ),
               ),
             ),
           ),
