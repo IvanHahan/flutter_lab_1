@@ -1,40 +1,42 @@
+import 'package:flutter_lab_1/models/department.dart';
 import 'package:flutter_lab_1/models/student.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_lab_1/providers/departments_provider.dart';
+import 'package:flutter_lab_1/providers/students_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NewStudent extends StatefulWidget {
-  NewStudent(
-      {super.key,
-      required this.onAddExpense,
-      required this.onEditStudent,
-      this.student});
+class NewStudent extends ConsumerStatefulWidget {
+  const NewStudent({super.key, this.studentIndex});
 
-  final void Function(Student expense) onAddExpense;
-  final void Function(Student student) onEditStudent;
-  Student? student;
+  final int? studentIndex;
 
   @override
-  State<StatefulWidget> createState() {
+  ConsumerState<ConsumerStatefulWidget> createState() {
     return _NewStudentState();
   }
 }
 
-class _NewStudentState extends State<NewStudent> {
+class _NewStudentState extends ConsumerState<NewStudent> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _gradeController = TextEditingController();
 
   Gender _selectedGender = Gender.male;
-  Department _selectedDepartment = Department.finance;
+  late Department _selectedDepartment;
 
   @override
   void initState() {
     super.initState();
-    if (widget.student != null) {
-      _firstNameController.text = widget.student!.firstName;
-      _lastNameController.text = widget.student!.lastName;
-      _gradeController.text = widget.student!.grade.toString();
-      _selectedGender = widget.student!.gender;
-      _selectedDepartment = widget.student!.department;
+    _selectedDepartment = ref.read(departmentsProvider)[0];
+    if (widget.studentIndex != null) {
+      final student = ref.read(studentsProvider)[widget.studentIndex!];
+      _firstNameController.text = student.firstName;
+      _lastNameController.text = student.lastName;
+      _gradeController.text = student.grade.toString();
+      _selectedGender = student.gender;
+      _selectedDepartment = ref
+          .read(departmentsProvider)
+          .firstWhere((department) => department.id == student.departmentId);
     }
   }
 
@@ -72,32 +74,32 @@ class _NewStudentState extends State<NewStudent> {
       return;
     }
 
-    if (widget.student != null) {
-      widget.onEditStudent(
-        Student.withId(
-          id: widget.student!.id,
-          firstName: _firstNameController.text.trim(),
-          lastName: _lastNameController.text.trim(),
-          department: _selectedDepartment,
-          gender: _selectedGender,
-          grade: entereGrade,
-        ),
-      );
-    } else {
-      widget.onAddExpense(
-        Student(
+    if (widget.studentIndex != null) {
+      ref.read(studentsProvider.notifier).editStudent(
+          Student(
             firstName: _firstNameController.text.trim(),
             lastName: _lastNameController.text.trim(),
-            department: _selectedDepartment,
+            departmentId: _selectedDepartment.id,
             gender: _selectedGender,
-            grade: entereGrade),
-      );
+            grade: entereGrade,
+          ),
+          widget.studentIndex!);
+    } else {
+      ref.read(studentsProvider.notifier).addStudent(
+            Student(
+                firstName: _firstNameController.text.trim(),
+                lastName: _lastNameController.text.trim(),
+                departmentId: _selectedDepartment.id,
+                gender: _selectedGender,
+                grade: entereGrade),
+          );
     }
     Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return LayoutBuilder(builder: (ctx, constraints) {
       final firstNameField = TextField(
         controller: _firstNameController,
@@ -105,6 +107,7 @@ class _NewStudentState extends State<NewStudent> {
         decoration: const InputDecoration(
           label: Text('First Name'),
         ),
+        style: theme.textTheme.titleLarge!.copyWith(color: theme.colorScheme.inversePrimary),
       );
       final lastNameField = TextField(
         controller: _lastNameController,
@@ -112,6 +115,7 @@ class _NewStudentState extends State<NewStudent> {
         decoration: const InputDecoration(
           label: Text('Last Name'),
         ),
+        style: theme.textTheme.titleLarge!.copyWith(color: theme.colorScheme.inversePrimary),
       );
 
       return Padding(
@@ -124,12 +128,14 @@ class _NewStudentState extends State<NewStudent> {
             TextField(
               controller: _gradeController,
               keyboardType: TextInputType.number,
+              style: theme.textTheme.titleLarge!.copyWith(color: theme.colorScheme.inversePrimary),
               decoration: const InputDecoration(
                 label: Text('Grade'),
               ),
             ),
             DropdownButton(
                 value: _selectedGender,
+                style: theme.textTheme.titleMedium!.copyWith(color: theme.colorScheme.inversePrimary),
                 items: Gender.values
                     .map(
                       (category) => DropdownMenuItem(
@@ -150,14 +156,23 @@ class _NewStudentState extends State<NewStudent> {
                 }),
             DropdownButton(
                 value: _selectedDepartment,
-                items: Department.values
+                items: ref
+                    .read(departmentsProvider)
                     .map(
-                      (category) => DropdownMenuItem(
-                        value: category,
-                        child: Text(
-                          category.name.toUpperCase(),
-                        ),
-                      ),
+                      (department) => DropdownMenuItem(
+                          value: department,
+                          child: Row(
+                            children: [
+                              Icon(department.icon),
+                              const SizedBox(
+                                width: 6,
+                              ),
+                              Text(
+                                _selectedDepartment.name,
+                                style: theme.textTheme.titleMedium!.copyWith(color: theme.colorScheme.inversePrimary),
+                              )
+                            ],
+                          )),
                     )
                     .toList(),
                 onChanged: (value) {
