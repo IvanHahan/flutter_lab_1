@@ -11,7 +11,7 @@ final theme = ThemeData(
     brightness: Brightness.dark,
     seedColor: const Color.fromARGB(255, 0, 100, 131),
   ),
-  textTheme: GoogleFonts.latoTextTheme(),
+  // textTheme: GoogleFonts.latoTextTheme(),
 );
 
 void main() {

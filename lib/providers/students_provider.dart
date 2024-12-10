@@ -60,5 +60,6 @@ final studentsProvider =
   final departments = ref.read(departmentsProvider);
 
   final notifier = StudentsNotifier(null);
+  notifier.loadStudents();
   return notifier;
 });

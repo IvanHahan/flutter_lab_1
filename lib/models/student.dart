@@ -47,7 +47,7 @@ class Student {
   }
 
   static Future<List<Student>> remoteGetList() async {
-    final url = Uri.https(baseUrl, studentsPath);
+    final url = Uri.https(baseUrl, "$studentsPath.json");
 
     final response = await http.get(
       url,
@@ -85,7 +85,7 @@ class Student {
     gender,
     grade,
   ) async {
-    final url = Uri.https(baseUrl, studentsPath);
+    final url = Uri.https(baseUrl, "$studentsPath.json");
 
     final response = await http.post(
       url,
@@ -119,7 +119,7 @@ class Student {
   }
 
   static Future remoteDelete(studentId) async {
-    final url = Uri.https(baseUrl, "$studentsPath/$studentId");
+    final url = Uri.https(baseUrl, "$studentsPath/$studentId.json");
 
     final response = await http.delete(url);
 
@@ -136,7 +136,7 @@ class Student {
     gender,
     grade,
   ) async {
-    final url = Uri.https(baseUrl, "$studentsPath/$studentId");
+    final url = Uri.https(baseUrl, "$studentsPath/$studentId.json");
 
     final response = await http.put(
       url,
