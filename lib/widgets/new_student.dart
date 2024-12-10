@@ -29,7 +29,7 @@ class _NewStudentState extends ConsumerState<NewStudent> {
     super.initState();
     _selectedDepartment = ref.read(departmentsProvider)[0];
     if (widget.studentIndex != null) {
-      final student = ref.read(studentsProvider)[widget.studentIndex!];
+      final student = ref.read(studentsProvider)![widget.studentIndex!];
       _firstNameController.text = student.firstName;
       _lastNameController.text = student.lastName;
       _gradeController.text = student.grade.toString();
@@ -48,7 +48,7 @@ class _NewStudentState extends ConsumerState<NewStudent> {
     super.dispose();
   }
 
-  void _sumbitStudent() {
+  void _sumbitStudent() async {
     final entereGrade = int.tryParse(_gradeController.text);
     final gradeIsInValid = entereGrade == null || entereGrade <= 0;
     final firstNameIsInvalid = _firstNameController.text.trim().isEmpty;
@@ -75,26 +75,27 @@ class _NewStudentState extends ConsumerState<NewStudent> {
     }
 
     if (widget.studentIndex != null) {
-      ref.read(studentsProvider.notifier).editStudent(
-          Student(
-            firstName: _firstNameController.text.trim(),
-            lastName: _lastNameController.text.trim(),
-            departmentId: _selectedDepartment.id,
-            gender: _selectedGender,
-            grade: entereGrade,
-          ),
-          widget.studentIndex!);
+      await ref.read(studentsProvider.notifier).editStudent(
+            widget.studentIndex!,
+            _firstNameController.text.trim(),
+            _lastNameController.text.trim(),
+            _selectedDepartment.id,
+            _selectedGender,
+            entereGrade,
+          );
     } else {
-      ref.read(studentsProvider.notifier).addStudent(
-            Student(
-                firstName: _firstNameController.text.trim(),
-                lastName: _lastNameController.text.trim(),
-                departmentId: _selectedDepartment.id,
-                gender: _selectedGender,
-                grade: entereGrade),
+      await ref.read(studentsProvider.notifier).addStudent(
+            _firstNameController.text.trim(),
+            _lastNameController.text.trim(),
+            _selectedDepartment.id,
+            _selectedGender,
+            entereGrade,
           );
     }
-    Navigator.pop(context);
+    if (!context.mounted) {
+        return;
+      }
+    Navigator.of(context).pop();
   }
 
   @override
@@ -107,7 +108,8 @@ class _NewStudentState extends ConsumerState<NewStudent> {
         decoration: const InputDecoration(
           label: Text('First Name'),
         ),
-        style: theme.textTheme.titleLarge!.copyWith(color: theme.colorScheme.inversePrimary),
+        style: theme.textTheme.titleLarge!
+            .copyWith(color: theme.colorScheme.inversePrimary),
       );
       final lastNameField = TextField(
         controller: _lastNameController,
@@ -115,7 +117,8 @@ class _NewStudentState extends ConsumerState<NewStudent> {
         decoration: const InputDecoration(
           label: Text('Last Name'),
         ),
-        style: theme.textTheme.titleLarge!.copyWith(color: theme.colorScheme.inversePrimary),
+        style: theme.textTheme.titleLarge!
+            .copyWith(color: theme.colorScheme.inversePrimary),
       );
 
       return Padding(
@@ -128,14 +131,16 @@ class _NewStudentState extends ConsumerState<NewStudent> {
             TextField(
               controller: _gradeController,
               keyboardType: TextInputType.number,
-              style: theme.textTheme.titleLarge!.copyWith(color: theme.colorScheme.inversePrimary),
+              style: theme.textTheme.titleLarge!
+                  .copyWith(color: theme.colorScheme.inversePrimary),
               decoration: const InputDecoration(
                 label: Text('Grade'),
               ),
             ),
             DropdownButton(
                 value: _selectedGender,
-                style: theme.textTheme.titleMedium!.copyWith(color: theme.colorScheme.inversePrimary),
+                style: theme.textTheme.titleMedium!
+                    .copyWith(color: theme.colorScheme.inversePrimary),
                 items: Gender.values
                     .map(
                       (category) => DropdownMenuItem(
@@ -169,7 +174,8 @@ class _NewStudentState extends ConsumerState<NewStudent> {
                               ),
                               Text(
                                 _selectedDepartment.name,
-                                style: theme.textTheme.titleMedium!.copyWith(color: theme.colorScheme.inversePrimary),
+                                style: theme.textTheme.titleMedium!.copyWith(
+                                    color: theme.colorScheme.inversePrimary),
                               )
                             ],
                           )),

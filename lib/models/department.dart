@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_lab_1/models/student.dart';
 import 'package:uuid/uuid.dart';
 
 const uuid = Uuid();

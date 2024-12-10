@@ -15,7 +15,8 @@ class DepartmentItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final enrolledStudents = ref.watch(studentsProvider).where((s) => s.departmentId == department.id).length;
+    final students = ref.watch(studentsProvider);
+    final enrolledStudents = (students == null) ? 'loading...' : students.where((s) => s.departmentId == department.id).length.toString();
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     return InkWell(
@@ -51,7 +52,7 @@ class DepartmentItem extends ConsumerWidget {
               const SizedBox(
                 width: 8,
               ),
-              Text(enrolledStudents.toString(),
+              Text(enrolledStudents,
                   style: textTheme.titleSmall!.copyWith(
                     color: theme.colorScheme.secondary,
                     fontWeight: FontWeight.bold,
