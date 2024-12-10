@@ -28,7 +28,7 @@ class StudentsScreen extends ConsumerWidget {
           onDismissed: (direction) {
             final studentToDelete = students[index];
             final notifier = ref.read(studentsProvider.notifier);
-            notifier.removeStudent(studentToDelete);
+            notifier.removeStudentLocal(studentToDelete);
             ScaffoldMessenger.of(context).clearSnackBars();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -37,10 +37,14 @@ class StudentsScreen extends ConsumerWidget {
                 action: SnackBarAction(
                     label: 'Undo',
                     onPressed: () {
-                      notifier.insertStudent(studentToDelete, index);
+                      notifier.insertStudentLocal(studentToDelete, index);
                     }),
               ),
-            );
+            ).closed.then((value) {
+              if (value != SnackBarClosedReason.action) {
+                notifier.removeStudent(studentToDelete);
+              }
+            });
           },
           child: InkWell(
             onTap: () {

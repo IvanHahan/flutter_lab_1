@@ -43,10 +43,14 @@ class StudentsNotifier extends StateNotifier<List<Student>?> {
     state = newState;
   }
 
-  Future insertStudent(Student student, int index) async {
+  Future insertStudentLocal(Student student, int index) async {
     final newState = [...state!];
     newState.insert(index, student);
     state = newState;
+  }
+
+  void removeStudentLocal(Student student) async {
+    state = state!.where((m) => m.id != student.id).toList();
   }
 
   Future removeStudent(Student student) async {
